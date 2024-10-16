@@ -1,0 +1,394 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - develop-refactoring
+env:
+  RUST_BACKTRACE: 1
+
+jobs:
+  style:
+    name: Check style
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: fmt
+        run: cargo fmt --all -- --check
+
+  check-benches:
+    name: Check benchmarks
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-benches-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Check
+        run: |
+          cargo bench --no-run
+
+  test-accumulators:
+    name: Test (accumulators/)
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-accumulator-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: taiki-e/install-action@nextest
+
+      - name: Test
+        run: |
+          cd accumulators/
+          cargo nextest run
+          cargo test --doc
+
+  test-algebra:
+    name: Test (algebra/)
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-algebra-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: taiki-e/install-action@nextest
+
+      - name: Test
+        run: |
+          cd algebra/
+          cargo nextest run
+          cargo test --doc
+
+  test-api:
+    name: Test (api/)
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-api-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: taiki-e/install-action@nextest
+
+      - name: Test
+        run: |
+          cd api/
+          cargo nextest run
+          cargo test --doc
+
+  test-smoke-tests:
+    name: Test (smoke-tests/)
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-api-smoke-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: taiki-e/install-action@nextest
+
+      - name: Test
+        run: |
+          cd smoke-tests/
+          cargo nextest run
+          cargo test --doc
+
+  test-crypto:
+    name: Test (crypto/)
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-crypto-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: taiki-e/install-action@nextest
+
+      - name: Test
+        run: |
+          cd crypto/
+          cargo nextest run
+          cargo test --doc
+
+  test-plonk:
+    name: Test (plonk/)
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-plonk-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: taiki-e/install-action@nextest
+
+      - name: Test
+        run: |
+          cd plonk/
+          cargo nextest run
+          cargo test --doc
+
+  dangling_check:
+    name: Check dangling
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: 1
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@nextest
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-dangling-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Dangling test
+        run: |
+          cd smoke-tests/
+          cargo nextest run --features=debug
+          cargo test --doc
+
+  wasm_check:
+    name: Check WASM
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: 1
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          version: 'latest'
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-wasm-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: WASM test
+        run: |
+          wasm-pack test --node smoke-tests
+
+  parallel_check:
+    name: Check parallel
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@nextest
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-parallel-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Parallel test
+        run: |
+          cd smoke-tests/
+          cargo nextest run --features=parallel
+          cargo test --doc
+
+  xfr_tracing_check:
+    name: Check xfr_tracing
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@nextest
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-xfr_tracing-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: xfr_tracing test
+        run: |
+          cd smoke-tests/
+          cargo nextest run --features=xfr-tracing
+          cargo test --doc
+
+  consistency_check:
+    name: Check verifier parameters
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-consistency-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build verifier parameters
+        run: cargo run --release -p noah --features=gen,no_vk --bin gen-params all ./api/parameters
+
+      - name: Check changed files in the parameters folder1
+        id: verify-changed-files
+        uses: tj-actions/verify-changed-files@v12
+        with:
+          files: |
+            api/parameters/**
+
+      - name: Get changed files in the parameters folder2
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v34
+        with:
+          files: |
+            api/parameters/**
+
+      - name: Break if any file(s) change
+        if: steps.verify-changed-files.outputs.files_changed == 'true' && steps.changed-files-specific.outputs.any_modified != 'true'
+        run: |
+          for file in ${{ steps.verify-changed-files.outputs.changed_files }}; do
+            echo "$file was changed"
+          done
+          exit 1
+
+  check_no_std:
+    name: Check no_std
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: thumbv6m-none-eabi
+          override: true
+
+      - name: Install Rust ARM64
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-none
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: check
+        uses: actions-rs/cargo@v1
+        with:
+            command: check
+            args: "--examples --workspace \
+                  --exclude accumulators \
+                  --target thumbv6m-none-eabi"
+
+      - name: build
+        uses: actions-rs/cargo@v1
+        with:
+            command: build
+            args: "--examples --workspace \
+                  --exclude accumulators \
+                  --target thumbv6m-none-eabi"

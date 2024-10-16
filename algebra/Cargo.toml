@@ -1,0 +1,154 @@
+[[bench]]
+name = 'msm'
+path = 'benches/msm.rs'
+harness = false
+
+[package]
+name = 'algebra'
+description = 'algebra library'
+version = '0.5.0'
+edition = '2021'
+
+[lib]
+name = 'algebra'
+crate-type = ['rlib']
+
+[dependencies]
+base64 = "0.21"
+digest = '0.10'
+itertools = '0.11.0'
+serde = '1.0'
+serde_derive = '1.0'
+rayon = { version = "1", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys = "0.3.27"
+web-sys = { version = "0.3.61", features = [ "console" ] }
+wasm-bindgen-futures = "0.4.23"
+wasm-rs-async-executor = "0.9.0"
+wasm-bindgen-test = { version = "^0.3" }
+
+[dependencies.curve25519-dalek]
+package = "noah-curve25519-dalek"
+version = "4.0.0"
+default-features = false
+features = ['serde']
+
+[dependencies.x25519-dalek]
+package = "noah-x25519-dalek"
+version = "4.0.0"
+default-features = false
+
+[dependencies.bulletproofs]
+package = "noah-bulletproofs"
+version = "4.1.0"
+
+[dependencies.ark-ec]
+version = '0.4.0'
+default-features = false
+
+[dependencies.ark-ff]
+version = '0.4.0'
+default-features = false
+features = ['asm']
+
+[dependencies.ark-std]
+version = '0.4.0'
+default-features = false
+
+[dependencies.ark-serialize]
+version = '0.4.0'
+default-features = false
+
+[dependencies.ark-ed-on-bls12-381]
+version = '0.4.0'
+default-features = false
+
+[dependencies.ark-bls12-381]
+version = '0.4.0'
+default-features = false
+features = ['curve']
+
+[dependencies.ark-ed-on-bn254]
+package = "ark-ed-on-bn254-mixed-radix"
+git = "https://github.com/HyprNetwork/ark-ed-on-bn254-mixed-radix"
+default-features = false
+
+[dependencies.ark-bn254]
+package = "ark-bn254-mixed-radix"
+git = "https://github.com/HyprNetwork/ark-bn254-mixed-radix"
+default-features = false
+features = ['curve']
+
+[dependencies.ark-secp256k1]
+version = '0.4.0'
+default-features = false
+
+[dependencies.ark-secq256k1]
+version = '0.4.0'
+default-features = false
+
+[dependencies.ark-ed25519]
+version = '0.4.0'
+default-features = false
+
+[dependencies.ark-bulletproofs]
+version = '4.1.0'
+default-features = false
+features = ['yoloproofs']
+
+[dependencies.byteorder]
+version = '^1.2.3'
+default-features = false
+features = ['i128']
+
+[dependencies.rand_chacha]
+version = '0.3'
+default-features = false
+
+[dependencies.wasm-bindgen]
+version = '0.2.50'
+features = ['serde-serialize']
+
+[dependencies.num-bigint]
+version = '0.4'
+
+[dependencies.num-traits]
+version = "0.2"
+
+[dependencies.num-integer]
+version = "0.1"
+
+[features]
+default = [
+    'std',
+    'u64_backend',
+]
+std = [
+    'curve25519-dalek/std',
+    'bulletproofs/std',
+    'ark-bulletproofs/std',
+    'ark-ed-on-bls12-381/std',
+    'ark-bls12-381/std',
+    'ark-secp256k1/std',
+    'ark-secq256k1/std',
+    'ark-ed25519/std',
+    'ark-ec/std',
+    'ark-std/std',
+    'ark-ff/std',
+    'ark-serialize/std'
+]
+alloc = ['curve25519-dalek/alloc']
+nightly = ['curve25519-dalek/nightly']
+u64_backend = ['curve25519-dalek/u64_backend']
+u32_backend = ['curve25519-dalek/u32_backend']
+avx2_backend = ['curve25519-dalek/avx2_backend']
+parallel = [
+    'rayon',
+    'ark-std/parallel',
+    'ark-ec/parallel',
+    'ark-ff/parallel',
+    'ark-bulletproofs/parallel'
+]
+asm = ['ark-ff/asm']
+print-trace = ['ark-std/print-trace']

@@ -1,0 +1,13 @@
+# IDE files
+.idea
+**/.DS_Store
+
+
+# Build files
+/release
+/target
+**/target
+**/release
+**/*.rs.bk
+.*.sw*
+Cargo.lock
